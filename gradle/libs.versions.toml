@@ -10,6 +10,25 @@ material = "1.10.0"
 activity = "1.10.0"
 constraintlayout = "2.1.4"
 
+safeArgs = "2.5.3"
+kotlinxSerialization = "1.5.1"
+pluginSerialization = "1.8.21"
+hilt = "2.48"
+hiltPlugin = "2.48"
+navigationFragmentKtx = "2.7.6"
+navigationUiKtx = "2.7.6"
+lottie = "4.2.0"
+lifecycle-runtime-ktx = "2.7.0"
+androidxLifecycle = "2.7.0"
+timber = "5.0.1"
+retrofit = "2.9.0"
+gson = "2.10.1"
+okhttp = "4.12.0"
+logging-interceptor = "4.10.0"
+glide = "4.13.2"
+google-maps = "18.2.0"
+maps-utils-ktx = "3.4.0"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -19,9 +38,33 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
+lottie = { group = "com.airbnb.android", name = "lottie", version.ref = "lottie" }
+lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "androidxLifecycle" }
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+retrofitKotlinSerializationConverter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "retrofit" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+retrofit-gson-converter = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "logging-interceptor" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+glideCompiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
+google-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "google-maps" }
+maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version.ref = "maps-utils-ktx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+android-safeArgs = { id = "androidx.navigation.safeargs", version.ref = "safeArgs" }
+dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hiltPlugin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
