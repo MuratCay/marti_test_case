@@ -26,6 +26,7 @@ glide = "4.13.2"
 google-maps = "18.2.0"
 maps-utils-ktx = "3.4.0"
 room = "2.6.1"
+play-services-location = "21.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -56,6 +57,7 @@ maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version.re
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "play-services-location" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

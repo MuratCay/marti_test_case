@@ -46,7 +46,7 @@ dependencies {
     kapt(libs.room.compiler)
 
     // Location Services
-    //implementation(libs.google.play.services.location)
+    implementation(libs.play.services.location)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
