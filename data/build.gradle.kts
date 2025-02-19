@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.dagger.hilt)
+    alias(libs.plugins.kotlin.kapt)
 }
 
 android {
@@ -33,6 +35,18 @@ android {
 }
 
 dependencies {
+    implementation(project(":domain"))
+
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+    // Room
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    kapt(libs.room.compiler)
+
+    // Location Services
+    //implementation(libs.google.play.services.location)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
