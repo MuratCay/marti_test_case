@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "marti_test_case"
 include(":app")
+include(":data")
