@@ -1,3 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">marti_test_case</string>
+    <string name="start_stop_tracking">Start/Stop Tracking</string>
+    <string name="clear_route">Clear Route</string>
+    <string name="location_permission_required">Location permission is required for tracking</string>
+    <string name="background_location_permission_required">Background location permission is required for continuous tracking</string>
 </resources>

@@ -1,3 +1,12 @@
+import java.util.Properties
+import java.io.FileInputStream
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -19,6 +28,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY", "")
     }
 
     buildTypes {
@@ -29,7 +40,15 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            buildConfigField(
+                type = "String",
+                name = "MAPS_API_KEY",
+                value = "\"${getProperty("MAPS_API_KEY")}\""
+            )
+        }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -41,6 +60,25 @@ android {
     buildFeatures {
         dataBinding = true
         buildConfig = true
+    }
+}
+
+fun getProperty(propertyName: String): String? {
+    println("getProperty called for: $propertyName") // Yeni satır
+    val propFile = rootProject.file("local.properties")
+    if (propFile.exists()) {
+        println("local.properties exists") // Yeni satır
+        val props = Properties()
+        propFile.inputStream().use { props.load(it) }
+        val value = props.getProperty(propertyName)
+        println("Value from local.properties: $value") // Yeni satır
+        return value
+    } else {
+        println("local.properties does NOT exist") // Yeni satır
+        // local.properties yoksa, gradle.properties'den çekmeyi dene
+        val value = System.getenv(propertyName) ?: project.properties[propertyName] as? String
+        println("Value from gradle.properties or env: $value") // Yeni satır
+        return value
     }
 }
 
@@ -64,6 +102,9 @@ dependencies {
     implementation(libs.kotlinx.serialization)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
+
+    implementation(libs.google.maps)
+    implementation(libs.maps.utils.ktx)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
