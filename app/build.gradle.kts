@@ -1,6 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.dagger.hilt)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.serialization)
+    alias(libs.plugins.android.safeArgs)
 }
 
 android {
@@ -33,9 +37,33 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    buildFeatures {
+        dataBinding = true
+        buildConfig = true
+    }
 }
 
 dependencies {
+
+    implementation(project(":presentation"))
+    implementation(project(":data"))
+    implementation(project(":domain"))
+
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+
+    implementation(libs.glide)
+
+    implementation(libs.timber)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
+    implementation(libs.kotlinx.serialization)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
