@@ -12,13 +12,11 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.muratcay.domain.model.LocationPoint
 import com.muratcay.data.local.dao.LocationDao
-import com.muratcay.data.mapper.toEntity
 import com.muratcay.domain.utils.Result
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.coroutines.resume

@@ -11,6 +11,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.snackbar.Snackbar
 
 abstract class BaseFragment<VB : ViewDataBinding, VM : ViewModel>(@LayoutRes protected val contentLayoutId: Int) :
     Fragment() {
@@ -52,6 +53,10 @@ abstract class BaseFragment<VB : ViewDataBinding, VM : ViewModel>(@LayoutRes pro
                 Toast.LENGTH_SHORT
             ).show()
         }
+    }
+
+    fun showSnackbar(message: String) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
     }
 
     override fun onDestroyView() {
