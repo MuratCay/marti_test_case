@@ -1,12 +1,8 @@
 package com.muratcay.marti_test_case.feature.map
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.view.View
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -22,6 +18,7 @@ import com.google.android.gms.maps.model.PolylineOptions
 import com.muratcay.domain.model.LocationPoint
 import com.muratcay.marti_test_case.R
 import com.muratcay.marti_test_case.databinding.FragmentMapBinding
+import com.muratcay.marti_test_case.utils.PermissionUtils
 import com.muratcay.presentation.base.BaseFragment
 import com.muratcay.presentation.map.MapState
 import com.muratcay.presentation.map.MapViewModel
@@ -36,36 +33,12 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
     private var isTracking = false
     private val markers = mutableMapOf<LatLng, Marker>()
 
-    private val locationPermissionRequest = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        when {
-            permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
-                    permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true -> {
-                setupMap()
-                requestBackgroundLocationPermissionIfNeeded()
-            }
-            else -> {
-                showSnackbar(getString(R.string.location_permission_required))
-            }
-        }
-    }
-
-    private val backgroundLocationPermissionRequest = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (!isGranted) {
-            showSnackbar(getString(R.string.background_location_permission_required))
-        }
-    }
-
     override fun getViewModelClass(): Class<MapViewModel> = MapViewModel::class.java
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupMapFragment()
         setupClickListeners()
-        checkLocationPermission()
     }
 
     override fun initObserver() {
@@ -92,10 +65,10 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
             if (isTracking) {
                 viewModel.stopLocationTracking()
             } else {
-                if (hasRequiredPermissions()) {
+                if (PermissionUtils.hasLocationPermissions(requireContext())) {
                     viewModel.startLocationTracking()
                 } else {
-                    requestLocationPermission()
+                    showSnackbar(getString(R.string.location_permission_required))
                 }
             }
         }
@@ -105,109 +78,15 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
         }
     }
 
-    private fun checkLocationPermission() {
-        when {
-            hasRequiredPermissions() -> {
-                setupMap()
-            }
-            hasLocationPermission() -> {
-                requestBackgroundLocationPermissionIfNeeded()
-            }
-            else -> {
-                requestLocationPermission()
-            }
-        }
-    }
-
-    private fun hasRequiredPermissions(): Boolean {
-        val hasLocationPermission = hasLocationPermission()
-        val hasBackgroundPermission = hasBackgroundLocationPermission()
-        val hasForegroundServicePermission = hasForegroundServiceLocationPermission()
-
-        return hasLocationPermission && hasBackgroundPermission && hasForegroundServicePermission
-    }
-
-    private fun hasLocationPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            requireContext(),
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun hasBackgroundLocationPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            true
-        }
-    }
-
-    private fun hasForegroundServiceLocationPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.FOREGROUND_SERVICE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            true
-        }
-    }
-
-    private fun requestLocationPermission() {
-        val permissions = mutableListOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ).apply {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                add(Manifest.permission.FOREGROUND_SERVICE_LOCATION)
-            }
-        }
-
-        locationPermissionRequest.launch(permissions.toTypedArray())
-    }
-
-    private fun requestBackgroundLocationPermissionIfNeeded() {
-        when {
-            !hasBackgroundLocationPermission() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-                showSnackbar(getString(R.string.background_location_permission_required))
-                requestBackgroundLocationPermission()
-            }
-            !hasForegroundServiceLocationPermission() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> {
-                requestLocationPermission()
-            }
-            else -> {
-                setupMap()
-            }
-        }
-    }
-
-    private fun requestBackgroundLocationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            backgroundLocationPermissionRequest.launch(
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            )
-        }
-    }
-
     private fun setupMap() {
         try {
-            if (hasRequiredPermissions()) {
+            if (PermissionUtils.hasLocationPermissions(requireContext())) {
                 googleMap?.isMyLocationEnabled = true
                 googleMap?.uiSettings?.apply {
                     isMyLocationButtonEnabled = true
                     isZoomControlsEnabled = true
                     isCompassEnabled = true
                 }
-            } else {
-                requestLocationPermission()
-                showSnackbar(getString(R.string.location_permission_required))
             }
         } catch (e: SecurityException) {
             showSnackbar(getString(R.string.location_permission_required))
@@ -252,7 +131,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
 
     private fun updateMapLocation(latitude: Double, longitude: Double) {
         try {
-            if (hasLocationPermission()) {
+            if (PermissionUtils.hasLocationPermissions(requireContext())) {
                 val location = LatLng(latitude, longitude)
                 googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15f))
             }
@@ -263,7 +142,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
 
     private fun updateRouteOnMap(points: List<LocationPoint>) {
         try {
-            if (!hasLocationPermission()) {
+            if (!PermissionUtils.hasLocationPermissions(requireContext())) {
                 showSnackbar(getString(R.string.location_permission_required))
                 return
             }
@@ -286,7 +165,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
             points.forEach { point ->
                 val position = LatLng(point.latitude, point.longitude)
                 googleMap?.addMarker(
-                    MarkerOptions(  )
+                    MarkerOptions()
                         .position(position)
                         .title(point.address ?: "Location point")
                 )?.let { marker ->
