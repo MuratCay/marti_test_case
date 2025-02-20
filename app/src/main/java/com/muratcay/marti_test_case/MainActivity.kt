@@ -1,8 +1,8 @@
 package com.muratcay.marti_test_case
 
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.commitNow
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -25,16 +25,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        hideNavHostFragment()
         initializeApp()
-    }
-
-    private fun hideNavHostFragment() {
-        findViewById<View>(R.id.nav_host_fragment)?.visibility = View.GONE
-    }
-
-    private fun showNavHostFragment() {
-        findViewById<View>(R.id.nav_host_fragment)?.visibility = View.VISIBLE
     }
 
     private fun initializeApp() {
@@ -109,11 +100,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun startApp() {
         setupNavigation()
-        showNavHostFragment()
     }
 
     private fun setupNavigation() {
-        navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        // TODO: Bu kodları yazmamdaki amaç, emülatörlerde ilk çalıştırmada izinler verildikten hemen sonra konum bilgisini edinememektir. Fiziksel cihazlarda ise böyle bir problemle karşılaşılmamaktadır.
+        navHostFragment = NavHostFragment().apply {
+            arguments = Bundle().apply {
+                putInt("android-support-nav:fragment:graphId", R.navigation.nav_graph)
+            }
+        }
+        supportFragmentManager.commitNow {
+            replace(R.id.container, navHostFragment!!)
+            setPrimaryNavigationFragment(navHostFragment)
+        }
         navController = navHostFragment?.navController
     }
 
