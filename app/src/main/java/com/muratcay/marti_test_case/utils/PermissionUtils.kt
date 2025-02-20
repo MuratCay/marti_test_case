@@ -22,8 +22,4 @@ object PermissionUtils {
     } else {
         emptyArray()
     }
-
-    const val LOCATION_PERMISSION_REQUEST_CODE = 1001
-    const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1002
-    const val BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE = 1003
 } 
