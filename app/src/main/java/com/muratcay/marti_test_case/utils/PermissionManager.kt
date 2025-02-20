@@ -1,6 +1,5 @@
 package com.muratcay.marti_test_case.utils
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -8,6 +7,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.muratcay.marti_test_case.R
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -104,10 +104,10 @@ class PermissionManager @Inject constructor() {
     private fun showLocationPermissionRationale(onPositive: () -> Unit) {
         activity?.let { activity ->
             MaterialAlertDialogBuilder(activity)
-                .setTitle("Konum İzni Gerekli")
-                .setMessage("Uygulamanın düzgün çalışması için konum izni gereklidir.")
-                .setPositiveButton("İzin Ver") { _, _ -> onPositive() }
-                .setNegativeButton("İptal") { dialog, _ ->
+                .setTitle(activity.getString(R.string.location_permission_required))
+                .setMessage(activity.getString(R.string.location_permission_required_app_function))
+                .setPositiveButton(activity.getString(R.string.allow)) { _, _ -> onPositive() }
+                .setNegativeButton(activity.getString(R.string.cancel)) { dialog, _ ->
                     dialog.dismiss()
                     permissionCallback?.onPermissionDenied()
                 }
@@ -118,10 +118,10 @@ class PermissionManager @Inject constructor() {
     private fun showBackgroundLocationPermissionRationale(onPositive: () -> Unit) {
         activity?.let { activity ->
             MaterialAlertDialogBuilder(activity)
-                .setTitle("Arka Plan Konum İzni")
-                .setMessage("Uygulama kapalıyken de konum takibi için arka plan konum izni gereklidir.")
-                .setPositiveButton("İzin Ver") { _, _ -> onPositive() }
-                .setNegativeButton("İptal") { dialog, _ ->
+                .setTitle(activity.getString(R.string.background_location_permission))
+                .setMessage(activity.getString(R.string.background_location_permission_required_app_closed))
+                .setPositiveButton(activity.getString(R.string.allow)) { _, _ -> onPositive() }
+                .setNegativeButton(activity.getString(R.string.cancel)) { dialog, _ ->
                     dialog.dismiss()
                     permissionCallback?.onPermissionDenied()
                 }
@@ -132,10 +132,10 @@ class PermissionManager @Inject constructor() {
     private fun showNotificationPermissionRationale(onPositive: () -> Unit) {
         activity?.let { activity ->
             MaterialAlertDialogBuilder(activity)
-                .setTitle("Bildirim İzni Gerekli")
-                .setMessage("Önemli bilgileri alabilmeniz için bildirim izni gereklidir.")
-                .setPositiveButton("İzin Ver") { _, _ -> onPositive() }
-                .setNegativeButton("İptal") { dialog, _ ->
+                .setTitle(activity.getString(R.string.notification_permission_required))
+                .setMessage(activity.getString(R.string.notification_permission_required_important_info))
+                .setPositiveButton(activity.getString(R.string.allow)) { _, _ -> onPositive() }
+                .setNegativeButton(activity.getString(R.string.cancel)) { dialog, _ ->
                     dialog.dismiss()
                     permissionCallback?.onPermissionDenied()
                 }
@@ -146,10 +146,10 @@ class PermissionManager @Inject constructor() {
     private fun showPermissionDeniedDialog() {
         activity?.let { activity ->
             MaterialAlertDialogBuilder(activity)
-                .setTitle("İzinler Reddedildi")
-                .setMessage("Uygulamanın düzgün çalışması için gerekli izinleri ayarlardan etkinleştirmelisiniz.")
-                .setPositiveButton("Ayarlara Git") { _, _ -> openAppSettings() }
-                .setNegativeButton("İptal") { dialog, _ -> dialog.dismiss() }
+                .setTitle(activity.getString(R.string.permissions_denied))
+                .setMessage(activity.getString(R.string.permissions_required_settings))
+                .setPositiveButton(activity.getString(R.string.go_to_settings)) { _, _ -> openAppSettings() }
+                .setNegativeButton(activity.getString(R.string.cancel)) { dialog, _ -> dialog.dismiss() }
                 .show()
         }
     }

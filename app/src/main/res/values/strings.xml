@@ -5,4 +5,14 @@
     <string name="clear_route">Clear Route</string>
     <string name="location_permission_required">Location permission is required for tracking</string>
     <string name="background_location_permission_required">Background location permission is required for continuous tracking</string>
+    <string name="permissions_denied">Permissions Denied</string>
+    <string name="permissions_required_settings">For the app to work properly, you must enable the necessary permissions from the settings.</string>
+    <string name="go_to_settings">Go to Settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="notification_permission_required">Notification Permission Required</string>
+    <string name="allow">Allow</string>
+    <string name="notification_permission_required_important_info">Notification permission is required to ensure you receive important information.</string>
+    <string name="background_location_permission">Background Location Permission</string>
+    <string name="background_location_permission_required_app_closed">Background location permission is required for location tracking even when the app is closed.</string>
+    <string name="location_permission_required_app_function">Location permission is required for the app to work properly.</string>
 </resources>
