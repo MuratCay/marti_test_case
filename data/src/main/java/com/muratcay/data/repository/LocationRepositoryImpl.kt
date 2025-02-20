@@ -9,6 +9,7 @@ import com.muratcay.data.source.LocationDataSource
 import com.muratcay.domain.utils.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 class LocationRepositoryImpl @Inject constructor(
@@ -18,6 +19,10 @@ class LocationRepositoryImpl @Inject constructor(
 
     override fun startLocationUpdates(): Flow<LocationPoint> {
         return locationDataSource.startLocationUpdates()
+            .onEach { locationPoint ->
+                // Save each location point as it comes in
+                saveLocationPoint(locationPoint)
+            }
     }
 
     override suspend fun stopLocationUpdates() {

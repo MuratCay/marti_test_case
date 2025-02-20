@@ -36,22 +36,28 @@ class LocationDataSourceImpl @Inject constructor(
     private var fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
     private var locationCallback: LocationCallback? = null
+    private var lastLocation: android.location.Location? = null
 
     @SuppressLint("MissingPermission")
     override fun startLocationUpdates(): Flow<LocationPoint> = callbackFlow {
         val locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
             UPDATE_INTERVAL
-        ).build()
+        ).setMinUpdateDistanceMeters(MIN_DISTANCE_METERS)
+        .setWaitForAccurateLocation(true)
+        .build()
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 result.lastLocation?.let { location ->
-                    val locationPoint = LocationPoint(
-                        latitude = location.latitude,
-                        longitude = location.longitude
-                    )
-                    trySend(locationPoint)
+                    if (shouldUpdateLocation(location)) {
+                        val locationPoint = LocationPoint(
+                            latitude = location.latitude,
+                            longitude = location.longitude
+                        )
+                        lastLocation = location
+                        trySend(locationPoint)
+                    }
                 }
             }
         }
@@ -68,6 +74,13 @@ class LocationDataSourceImpl @Inject constructor(
                 locationCallback = null
             }
         }
+    }
+
+    private fun shouldUpdateLocation(newLocation: android.location.Location): Boolean {
+        if (lastLocation == null) return true
+
+        val distance = lastLocation!!.distanceTo(newLocation)
+        return distance >= MIN_DISTANCE_METERS
     }
 
     override suspend fun stopLocationUpdates() {
@@ -109,5 +122,6 @@ class LocationDataSourceImpl @Inject constructor(
 
     companion object {
         private const val UPDATE_INTERVAL = 5000L // 5 seconds
+        private const val MIN_DISTANCE_METERS = 100f // 100 meters
     }
 } 
