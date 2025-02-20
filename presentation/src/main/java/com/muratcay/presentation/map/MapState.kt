@@ -12,4 +12,9 @@ sealed interface MapState : IState {
         val locationPoints: List<LocationPoint> = emptyList()
     ) : MapState
     data class Error(val message: String) : MapState
+    data class AddressLoaded(
+        val latitude: Double,
+        val longitude: Double,
+        val address: String
+    ) : MapState
 }

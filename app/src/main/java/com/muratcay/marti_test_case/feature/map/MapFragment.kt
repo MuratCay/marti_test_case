@@ -1,7 +1,9 @@
 package com.muratcay.marti_test_case.feature.map
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,6 +16,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.muratcay.domain.model.LocationPoint
@@ -27,22 +30,32 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.fragment_map),
-    OnMapReadyCallback {
+    OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private var googleMap: GoogleMap? = null
     private var isTracking = false
+    private val markers = mutableMapOf<LatLng, Marker>()
 
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         when {
             permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
-            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true -> {
+                    permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true -> {
                 setupMap()
+                requestBackgroundLocationPermissionIfNeeded()
             }
             else -> {
                 showSnackbar(getString(R.string.location_permission_required))
             }
+        }
+    }
+
+    private val backgroundLocationPermissionRequest = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) {
+            showSnackbar(getString(R.string.background_location_permission_required))
         }
     }
 
@@ -79,7 +92,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
             if (isTracking) {
                 viewModel.stopLocationTracking()
             } else {
-                if (hasLocationPermission()) {
+                if (hasRequiredPermissions()) {
                     viewModel.startLocationTracking()
                 } else {
                     requestLocationPermission()
@@ -94,7 +107,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
 
     private fun checkLocationPermission() {
         when {
-            hasLocationPermission() -> {
+            hasRequiredPermissions() -> {
                 setupMap()
             }
             else -> {
@@ -103,24 +116,73 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
         }
     }
 
+    private fun hasRequiredPermissions(): Boolean {
+        val hasLocationPermission = hasLocationPermission()
+        val hasBackgroundPermission = hasBackgroundLocationPermission()
+        val hasForegroundServicePermission = hasForegroundServiceLocationPermission()
+
+        return hasLocationPermission && hasBackgroundPermission && hasForegroundServicePermission
+    }
+
     private fun hasLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             requireContext(),
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun hasBackgroundLocationPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ContextCompat.checkSelfPermission(
                 requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+    }
+
+    private fun hasForegroundServiceLocationPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.FOREGROUND_SERVICE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
     }
 
     private fun requestLocationPermission() {
-        locationPermissionRequest.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
+        val permissions = mutableListOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ).apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                add(Manifest.permission.FOREGROUND_SERVICE_LOCATION)
+            }
+        }
+
+        locationPermissionRequest.launch(permissions.toTypedArray())
+    }
+
+    private fun requestBackgroundLocationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !hasBackgroundLocationPermission()) {
+            showSnackbar(getString(R.string.background_location_permission_required))
+            requestBackgroundLocationPermission()
+        }
+    }
+
+    private fun requestBackgroundLocationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            backgroundLocationPermissionRequest.launch(
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
             )
-        )
+        }
     }
 
     private fun setupMap() {
@@ -157,6 +219,14 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
             is MapState.Idle -> {
                 binding.progressBar.visibility = View.GONE
             }
+            is MapState.AddressLoaded -> {
+                binding.progressBar.visibility = View.GONE
+                val position = LatLng(state.latitude, state.longitude)
+                markers[position]?.let { marker ->
+                    updateMarkerAddress(marker, state.address)
+                }
+            }
+            else -> Unit
         }
     }
 
@@ -185,6 +255,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
             }
 
             googleMap?.clear()
+            markers.clear()
 
             if (points.isEmpty()) return
 
@@ -199,19 +270,37 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
 
             // Add markers
             points.forEach { point ->
+                val position = LatLng(point.latitude, point.longitude)
                 googleMap?.addMarker(
-                    MarkerOptions()
-                        .position(LatLng(point.latitude, point.longitude))
+                    MarkerOptions(  )
+                        .position(position)
                         .title(point.address ?: "Location point")
-                )
+                )?.let { marker ->
+                    markers[position] = marker
+                }
             }
         } catch (e: SecurityException) {
             showSnackbar(getString(R.string.location_permission_required))
         }
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
         setupMap()
+        googleMap?.setOnMarkerClickListener(this)
+    }
+
+    override fun onMarkerClick(marker: Marker): Boolean {
+        val position = marker.position
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.getAddressForLocation(position.latitude, position.longitude)
+        }
+        return false
+    }
+
+    private fun updateMarkerAddress(marker: Marker, address: String) {
+        marker.title = address
+        marker.showInfoWindow()
     }
 }

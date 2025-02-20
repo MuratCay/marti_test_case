@@ -2,6 +2,8 @@ package com.muratcay.presentation.map
 
 import androidx.lifecycle.viewModelScope
 import com.muratcay.domain.model.LocationPoint
+import com.muratcay.domain.repository.LocationRepository
+import com.muratcay.domain.service.LocationServiceController
 import com.muratcay.domain.usecase.ClearLocationPointsUseCase
 import com.muratcay.domain.usecase.GetLocationPointsUseCase
 import com.muratcay.domain.usecase.StartLocationTrackingUseCase
@@ -18,10 +20,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
+    private val locationServiceController: LocationServiceController,
     private val startLocationTrackingUseCase: StartLocationTrackingUseCase,
     private val stopLocationTrackingUseCase: StopLocationTrackingUseCase,
     private val getLocationPointsUseCase: GetLocationPointsUseCase,
-    private val clearLocationPointsUseCase: ClearLocationPointsUseCase
+    private val clearLocationPointsUseCase: ClearLocationPointsUseCase,
+    private val locationRepository: LocationRepository
 ) : BaseViewModel<MapState>() {
 
     private var locationTrackingJob: Job? = null
@@ -46,7 +50,7 @@ class MapViewModel @Inject constructor(
                     is Result.Error -> {
                         setState(MapState.Error(result.error?.message ?: "Failed to load location points"))
                     }
-                    is Result.Loading -> {
+                    Result.Loading -> {
                         setState(MapState.Loading)
                     }
                 }
@@ -60,13 +64,14 @@ class MapViewModel @Inject constructor(
     fun startLocationTracking() {
         if (locationTrackingJob != null) return
 
+        locationServiceController.startService()
+
         locationTrackingJob = startLocationTrackingUseCase()
             .onEach { result ->
                 when (result) {
                     is Result.Success -> {
                         result.data?.let { location ->
                             lastKnownLocation = location
-                            // Only add points if they are more than 100 meters apart
                             if (shouldAddNewPoint(location)) {
                                 locationPoints.add(location)
                             }
@@ -76,7 +81,7 @@ class MapViewModel @Inject constructor(
                     is Result.Error -> {
                         setState(MapState.Error(result.error?.message ?: "Failed to track location"))
                     }
-                    is Result.Loading -> {
+                    Result.Loading -> {
                         setState(MapState.Loading)
                     }
                 }
@@ -88,6 +93,8 @@ class MapViewModel @Inject constructor(
     }
 
     fun stopLocationTracking() {
+        locationServiceController.stopService()
+
         viewModelScope.launch {
             stopLocationTrackingUseCase()
                 .collect { result ->
@@ -100,7 +107,7 @@ class MapViewModel @Inject constructor(
                         is Result.Error -> {
                             setState(MapState.Error(result.error?.message ?: "Failed to stop tracking"))
                         }
-                        is Result.Loading -> {
+                        Result.Loading -> {
                             setState(MapState.Loading)
                         }
                     }
@@ -120,7 +127,7 @@ class MapViewModel @Inject constructor(
                         is Result.Error -> {
                             setState(MapState.Error(result.error?.message ?: "Failed to clear route"))
                         }
-                        is Result.Loading -> {
+                        Result.Loading -> {
                             setState(MapState.Loading)
                         }
                     }
@@ -155,6 +162,25 @@ class MapViewModel @Inject constructor(
         val results = FloatArray(1)
         android.location.Location.distanceBetween(lat1, lon1, lat2, lon2, results)
         return results[0]
+    }
+
+    suspend fun getAddressForLocation(latitude: Double, longitude: Double) {
+        setState(MapState.Loading)
+        when (val result = locationRepository.getAddressFromLocation(latitude, longitude)) {
+            is Result.Success -> {
+                setState(
+                    MapState.AddressLoaded(
+                        latitude = latitude,
+                        longitude = longitude,
+                        address = result.data ?: "Address not found"
+                    )
+                )
+            }
+            is Result.Error -> {
+                setState(MapState.Error(result.error?.message ?: "Failed to get address"))
+            }
+            Result.Loading -> setState(MapState.Loading)
+        }
     }
 
     companion object {
