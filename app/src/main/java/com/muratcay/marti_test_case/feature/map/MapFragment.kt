@@ -110,6 +110,9 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
             hasRequiredPermissions() -> {
                 setupMap()
             }
+            hasLocationPermission() -> {
+                requestBackgroundLocationPermissionIfNeeded()
+            }
             else -> {
                 requestLocationPermission()
             }
@@ -171,9 +174,17 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
     }
 
     private fun requestBackgroundLocationPermissionIfNeeded() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !hasBackgroundLocationPermission()) {
-            showSnackbar(getString(R.string.background_location_permission_required))
-            requestBackgroundLocationPermission()
+        when {
+            !hasBackgroundLocationPermission() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                showSnackbar(getString(R.string.background_location_permission_required))
+                requestBackgroundLocationPermission()
+            }
+            !hasForegroundServiceLocationPermission() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> {
+                requestLocationPermission()
+            }
+            else -> {
+                setupMap()
+            }
         }
     }
 
@@ -187,13 +198,16 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
 
     private fun setupMap() {
         try {
-            if (hasLocationPermission()) {
+            if (hasRequiredPermissions()) {
                 googleMap?.isMyLocationEnabled = true
                 googleMap?.uiSettings?.apply {
                     isMyLocationButtonEnabled = true
                     isZoomControlsEnabled = true
                     isCompassEnabled = true
                 }
+            } else {
+                requestLocationPermission()
+                showSnackbar(getString(R.string.location_permission_required))
             }
         } catch (e: SecurityException) {
             showSnackbar(getString(R.string.location_permission_required))
