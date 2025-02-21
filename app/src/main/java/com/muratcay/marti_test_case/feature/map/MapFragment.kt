@@ -212,6 +212,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
         marker.showInfoWindow()
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onDestroyView() {
         super.onDestroyView()
         clearMapAndRoute()
