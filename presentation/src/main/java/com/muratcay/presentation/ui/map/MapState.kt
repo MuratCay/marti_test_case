@@ -1,4 +1,4 @@
-package com.muratcay.presentation.map
+package com.muratcay.presentation.ui.map
 
 import com.muratcay.domain.model.LocationPoint
 import com.muratcay.presentation.base.IState

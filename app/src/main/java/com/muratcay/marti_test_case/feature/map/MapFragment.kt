@@ -20,8 +20,8 @@ import com.muratcay.marti_test_case.R
 import com.muratcay.marti_test_case.databinding.FragmentMapBinding
 import com.muratcay.marti_test_case.utils.PermissionUtils
 import com.muratcay.presentation.base.BaseFragment
-import com.muratcay.presentation.map.MapState
-import com.muratcay.presentation.map.MapViewModel
+import com.muratcay.presentation.ui.map.MapState
+import com.muratcay.presentation.ui.map.MapViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 

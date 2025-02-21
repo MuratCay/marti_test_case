@@ -6,7 +6,7 @@
     <data>
         <variable
             name="viewModel"
-            type="com.muratcay.presentation.map.MapViewModel" />
+            type="com.muratcay.presentation.ui.map.MapViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

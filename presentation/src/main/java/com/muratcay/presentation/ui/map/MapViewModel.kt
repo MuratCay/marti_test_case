@@ -1,4 +1,4 @@
-package com.muratcay.presentation.map
+package com.muratcay.presentation.ui.map
 
 import androidx.lifecycle.viewModelScope
 import com.muratcay.domain.model.LocationPoint
