@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.muratcay.domain.model.LocationPoint
 import com.muratcay.domain.usecase.StartLocationTrackingUseCase
 import com.muratcay.domain.utils.Result
@@ -48,9 +49,12 @@ class LocationService : Service() {
 
     private fun start() {
         val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Location Tracking")
-            .setContentText("Starting location tracking...")
+            .setContentTitle(getString(R.string.notification_tracking_title))
+            .setContentText(getString(R.string.notification_tracking_getting_location))
             .setSmallIcon(R.drawable.ic_location)
+            .setStyle(NotificationCompat.BigTextStyle())
+            .setColor(ContextCompat.getColor(this, android.R.color.holo_blue_dark))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setOngoing(true)
             .setContentIntent(getPendingIntent())
             .build()
@@ -91,11 +95,15 @@ class LocationService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
-                "Location Tracking",
-                NotificationManager.IMPORTANCE_LOW
+                getString(R.string.notification_channel_name),
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Used for tracking location in background"
-                setShowBadge(false)
+                description = getString(R.string.notification_channel_description)
+                enableLights(true)
+                lightColor = android.graphics.Color.BLUE
+                setShowBadge(true)
+                enableVibration(true)
+                vibrationPattern = longArrayOf(100, 200, 300, 400, 500)
             }
             val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
@@ -116,10 +124,17 @@ class LocationService : Service() {
 
     @SuppressLint("DefaultLocale")
     private fun updateNotification(location: LocationPoint) {
+        val bigTextStyle = NotificationCompat.BigTextStyle()
+            .setBigContentTitle(getString(R.string.notification_tracking_active_title))
+            .bigText(getString(R.string.notification_location_format, location.latitude, location.longitude))
+
         val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Location Tracking Active")
-            .setContentText("Location: ${String.format("%.6f", location.latitude)}, ${String.format("%.6f", location.longitude)}")
+            .setContentTitle(getString(R.string.notification_tracking_active_title))
+            .setContentText(getString(R.string.notification_tracking_content))
             .setSmallIcon(R.drawable.ic_location)
+            .setStyle(bigTextStyle)
+            .setColor(ContextCompat.getColor(this, android.R.color.holo_blue_dark))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setOngoing(true)
             .setContentIntent(getPendingIntent())
             .build()

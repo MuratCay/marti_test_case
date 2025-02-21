@@ -15,4 +15,13 @@
     <string name="background_location_permission">Background Location Permission</string>
     <string name="background_location_permission_required_app_closed">Background location permission is required for location tracking even when the app is closed.</string>
     <string name="location_permission_required_app_function">Location permission is required for the app to work properly.</string>
+    
+    <!-- Location Service Notification Strings -->
+    <string name="notification_tracking_title">🚗 Konum Takibi Aktif</string>
+    <string name="notification_tracking_getting_location">Konum bilgisi alınıyor…</string>
+    <string name="notification_tracking_active_title">🚗 Araç Takip Aktif</string>
+    <string name="notification_tracking_content">Konum takibi devam ediyor</string>
+    <string name="notification_location_format">📍 Konum: %1$.6f, %2$.6f\n✅ Durum: Aktif olarak takip ediliyor</string>
+    <string name="notification_channel_name">Konum Takibi</string>
+    <string name="notification_channel_description">Arka planda konum takibi için kullanılır</string>
 </resources>
