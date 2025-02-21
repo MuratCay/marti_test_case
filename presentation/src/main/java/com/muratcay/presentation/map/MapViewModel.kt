@@ -31,6 +31,7 @@ class MapViewModel @Inject constructor(
     private var locationTrackingJob: Job? = null
     private var lastKnownLocation: LocationPoint? = null
     private val locationPoints = mutableListOf<LocationPoint>()
+    private var isTrackingActive = false
 
     override fun setInitialState(): MapState = MapState.Idle
 
@@ -39,31 +40,39 @@ class MapViewModel @Inject constructor(
     }
 
     private fun loadSavedLocationPoints() {
-        getLocationPointsUseCase()
-            .onEach { result ->
-                when (result) {
-                    is Result.Success -> {
-                        locationPoints.clear()
-                        locationPoints.addAll(result.data ?: emptyList())
-                        updateTrackingState()
-                    }
-                    is Result.Error -> {
-                        setState(MapState.Error(result.error?.message ?: "Failed to load location points"))
-                    }
-                    Result.Loading -> {
-                        setState(MapState.Loading)
+        viewModelScope.launch {
+            getLocationPointsUseCase()
+                .onEach { result ->
+                    when (result) {
+                        is Result.Success -> {
+                            locationPoints.clear()
+                            result.data?.let { points ->
+                                locationPoints.addAll(points)
+                                if (points.isNotEmpty()) {
+                                    lastKnownLocation = points.last()
+                                }
+                            }
+                            updateTrackingState()
+                        }
+                        is Result.Error -> {
+                            setState(MapState.Error(result.error?.message ?: "Failed to load location points"))
+                        }
+                        Result.Loading -> {
+                            setState(MapState.Loading)
+                        }
                     }
                 }
-            }
-            .catch { e ->
-                setState(MapState.Error(e.message ?: "Unknown error occurred"))
-            }
-            .launchIn(viewModelScope)
+                .catch { e ->
+                    setState(MapState.Error(e.message ?: "Unknown error occurred"))
+                }
+                .launchIn(viewModelScope)
+        }
     }
 
     fun startLocationTracking() {
         if (locationTrackingJob != null) return
 
+        isTrackingActive = true
         locationServiceController.startService()
 
         locationTrackingJob = startLocationTrackingUseCase()
@@ -94,6 +103,7 @@ class MapViewModel @Inject constructor(
 
     fun stopLocationTracking() {
         locationServiceController.stopService()
+        isTrackingActive = false
 
         viewModelScope.launch {
             stopLocationTrackingUseCase()
@@ -102,6 +112,7 @@ class MapViewModel @Inject constructor(
                         is Result.Success -> {
                             locationTrackingJob?.cancel()
                             locationTrackingJob = null
+                            // Don't clear points here, just update the tracking state
                             updateTrackingState()
                         }
                         is Result.Error -> {
@@ -122,6 +133,7 @@ class MapViewModel @Inject constructor(
                     when (result) {
                         is Result.Success -> {
                             locationPoints.clear()
+                            lastKnownLocation = null
                             updateTrackingState()
                         }
                         is Result.Error -> {
@@ -138,7 +150,7 @@ class MapViewModel @Inject constructor(
     private fun updateTrackingState() {
         setState(
             MapState.Tracking(
-                isTracking = locationTrackingJob != null,
+                isTracking = isTrackingActive,
                 currentLocation = lastKnownLocation,
                 locationPoints = locationPoints.toList()
             )

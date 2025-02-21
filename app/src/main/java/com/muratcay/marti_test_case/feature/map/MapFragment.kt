@@ -32,6 +32,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
     private var googleMap: GoogleMap? = null
     private var isTracking = false
     private val markers = mutableMapOf<LatLng, Marker>()
+    private var currentPolyline: com.google.android.gms.maps.model.Polyline? = null
 
     override fun getViewModelClass(): Class<MapViewModel> = MapViewModel::class.java
 
@@ -74,6 +75,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
         }
 
         binding.fabClear.setOnClickListener {
+            clearMapAndRoute()
             viewModel.clearRoute()
         }
     }
@@ -111,6 +113,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
             }
             is MapState.Idle -> {
                 binding.progressBar.visibility = View.GONE
+                clearMapAndRoute()
             }
             is MapState.AddressLoaded -> {
                 binding.progressBar.visibility = View.GONE
@@ -140,6 +143,13 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
         }
     }
 
+    private fun clearMapAndRoute() {
+        googleMap?.clear()
+        markers.clear()
+        currentPolyline?.remove()
+        currentPolyline = null
+    }
+
     private fun updateRouteOnMap(points: List<LocationPoint>) {
         try {
             if (!PermissionUtils.hasLocationPermissions(requireContext())) {
@@ -147,14 +157,13 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
                 return
             }
 
-            googleMap?.clear()
-            markers.clear()
+            clearMapAndRoute()
 
             if (points.isEmpty()) return
 
             // Draw route
             val routePoints = points.map { LatLng(it.latitude, it.longitude) }
-            googleMap?.addPolyline(
+            currentPolyline = googleMap?.addPolyline(
                 PolylineOptions()
                     .addAll(routePoints)
                     .color(ContextCompat.getColor(requireContext(), R.color.purple_500))
@@ -195,5 +204,12 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
     private fun updateMarkerAddress(marker: Marker, address: String) {
         marker.title = address
         marker.showInfoWindow()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        clearMapAndRoute()
+        googleMap?.setOnMarkerClickListener(null)
+        googleMap = null
     }
 }
