@@ -144,10 +144,13 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
     }
 
     private fun clearMapAndRoute() {
-        googleMap?.clear()
+        markers.values.forEach { marker ->
+            marker.remove()
+        }
         markers.clear()
         currentPolyline?.remove()
         currentPolyline = null
+        googleMap?.clear()
     }
 
     private fun updateRouteOnMap(points: List<LocationPoint>) {
@@ -157,7 +160,8 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
                 return
             }
 
-            clearMapAndRoute()
+            currentPolyline?.remove()
+            currentPolyline = null
 
             if (points.isEmpty()) return
 
@@ -170,15 +174,17 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
                     .width(12f)
             )
 
-            // Add markers
+            // Add markers only for new points
             points.forEach { point ->
                 val position = LatLng(point.latitude, point.longitude)
-                googleMap?.addMarker(
-                    MarkerOptions()
-                        .position(position)
-                        .title(point.address ?: "Location point")
-                )?.let { marker ->
-                    markers[position] = marker
+                if (!markers.containsKey(position)) {
+                    googleMap?.addMarker(
+                        MarkerOptions()
+                            .position(position)
+                            .title(point.address ?: "Location point")
+                    )?.let { marker ->
+                        markers[position] = marker
+                    }
                 }
             }
         } catch (e: SecurityException) {
