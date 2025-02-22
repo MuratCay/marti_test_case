@@ -35,34 +35,31 @@ class MapViewModel @Inject constructor(
 
     override fun setInitialState(): MapState = MapState.Idle
 
-    fun loadSavedLocationPoints() {
-        viewModelScope.launch {
-            getLocationPointsUseCase()
-                .onEach { result ->
-                    when (result) {
-                        is Result.Success -> {
-                            locationPoints.clear()
-                            result.data?.let { points ->
-                                locationPoints.addAll(points)
-                                if (points.isNotEmpty()) {
-                                    lastKnownLocation = points.last()
-                                }
+    fun loadSavedLocationPoints() = viewModelScope.launch {
+        getLocationPointsUseCase().onEach { result ->
+                when (result) {
+                    is Result.Success -> {
+                        locationPoints.clear()
+                        result.data?.let { points ->
+                            locationPoints.addAll(points)
+                            if (points.isNotEmpty()) {
+                                lastKnownLocation = points.last()
                             }
-                            updateTrackingState()
                         }
-                        is Result.Error -> {
-                            setState(MapState.Error(result.error?.message ?: "Failed to load location points"))
-                        }
-                        Result.Loading -> {
-                            setState(MapState.Loading)
-                        }
+                        updateTrackingState()
+                    }
+
+                    is Result.Error -> {
+                        setState(MapState.Error(result.error?.message ?: "Failed to load location points"))
+                    }
+
+                    Result.Loading -> {
+                        setState(MapState.Loading)
                     }
                 }
-                .catch { e ->
-                    setState(MapState.Error(e.message ?: "Unknown error occurred"))
-                }
-                .launchIn(viewModelScope)
-        }
+            }.catch { e ->
+                setState(MapState.Error(e.message ?: "Unknown error occurred"))
+            }.launchIn(viewModelScope)
     }
 
     fun startLocationTracking() {
@@ -108,7 +105,6 @@ class MapViewModel @Inject constructor(
                         is Result.Success -> {
                             locationTrackingJob?.cancel()
                             locationTrackingJob = null
-                            // Don't clear points here, just update the tracking state
                             updateTrackingState()
                         }
                         is Result.Error -> {
@@ -122,24 +118,23 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    fun clearRoute() {
-        viewModelScope.launch {
-            clearLocationPointsUseCase()
-                .collect { result ->
-                    when (result) {
-                        is Result.Success -> {
-                            locationPoints.clear()
-                            lastKnownLocation = null
-                            updateTrackingState()
-                        }
-                        is Result.Error -> {
-                            setState(MapState.Error(result.error?.message ?: "Failed to clear route"))
-                        }
-                        Result.Loading -> {
-                            setState(MapState.Loading)
-                        }
-                    }
+    fun clearRoute() = viewModelScope.launch {
+        clearLocationPointsUseCase().collect { result ->
+            when (result) {
+                is Result.Success -> {
+                    locationPoints.clear()
+                    lastKnownLocation = null
+                    updateTrackingState()
                 }
+
+                is Result.Error -> {
+                    setState(MapState.Error(result.error?.message ?: "Failed to clear route"))
+                }
+
+                Result.Loading -> {
+                    setState(MapState.Loading)
+                }
+            }
         }
     }
 
