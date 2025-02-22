@@ -20,7 +20,6 @@ class LocationRepositoryImpl @Inject constructor(
     override fun startLocationUpdates(): Flow<LocationPoint> {
         return locationDataSource.startLocationUpdates()
             .onEach { locationPoint ->
-                // Save each location point as it comes in
                 saveLocationPoint(locationPoint)
             }
     }
