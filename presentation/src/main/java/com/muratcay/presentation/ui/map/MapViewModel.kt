@@ -35,11 +35,7 @@ class MapViewModel @Inject constructor(
 
     override fun setInitialState(): MapState = MapState.Idle
 
-    init {
-        loadSavedLocationPoints()
-    }
-
-    private fun loadSavedLocationPoints() {
+    fun loadSavedLocationPoints() {
         viewModelScope.launch {
             getLocationPointsUseCase()
                 .onEach { result ->

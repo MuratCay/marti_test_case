@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onPermissionDenied() {
-                showPermissionRequiredDialog("Konum izni olmadan uygulama çalışamaz.") {
+                showPermissionRequiredDialog(getString(R.string.the_app_cannot_work_without_location_permission)) {
                     requestLocationPermission()
                 }
             }
@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onPermissionDenied() {
-                showPermissionRequiredDialog("Arka plan konum izni olmadan uygulama çalışamaz.") {
+                showPermissionRequiredDialog(getString(R.string.the_app_cannot_work_without_background_location_permission)) {
                     requestBackgroundLocationPermission()
                 }
             }
@@ -82,7 +82,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onPermissionDenied() {
-                // Bildirim izni olmadan devam edebiliriz
                 startApp()
             }
         })
@@ -90,10 +89,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun showPermissionRequiredDialog(message: String, onRetry: () -> Unit) {
         MaterialAlertDialogBuilder(this)
-            .setTitle("İzin Gerekli")
+            .setTitle(getString(R.string.permission_required))
             .setMessage(message)
-            .setPositiveButton("Tekrar Dene") { _, _ -> onRetry() }
-            .setNegativeButton("Uygulamadan Çık") { _, _ -> finish() }
+            .setPositiveButton(getString(R.string.try_again)) { _, _ -> onRetry() }
+            .setNegativeButton(getString(R.string.exit_application)) { _, _ -> finish() }
             .setCancelable(false)
             .show()
     }

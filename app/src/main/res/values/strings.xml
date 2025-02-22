@@ -24,4 +24,10 @@
     <string name="notification_location_format">📍 Konum: %1$.6f, %2$.6f\n✅ Durum: Aktif olarak takip ediliyor</string>
     <string name="notification_channel_name">Konum Takibi</string>
     <string name="notification_channel_description">Arka planda konum takibi için kullanılır</string>
+
+    <string name="permission_required">İzin gerekli</string>
+    <string name="try_again">Tekrar Dene</string>
+    <string name="exit_application">Uygulamadan Çık</string>
+    <string name="the_app_cannot_work_without_location_permission">Konum izni olmadan uygulama çalışamaz.</string>
+    <string name="the_app_cannot_work_without_background_location_permission">Arka plan konum izni olmadan uygulama çalışamaz.</string>
 </resources>

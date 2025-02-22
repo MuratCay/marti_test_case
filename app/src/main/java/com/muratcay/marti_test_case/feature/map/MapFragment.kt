@@ -197,6 +197,10 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>(R.layout.frag
         googleMap = map
         setupMap()
         googleMap?.setOnMarkerClickListener(this)
+        // Load saved location points when map is ready
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.loadSavedLocationPoints()
+        }
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
