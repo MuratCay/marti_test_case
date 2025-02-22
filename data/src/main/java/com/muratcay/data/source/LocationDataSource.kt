@@ -29,8 +29,7 @@ interface LocationDataSource {
 }
 
 class LocationDataSourceImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val locationDao: LocationDao
+    @ApplicationContext private val context: Context
 ) : LocationDataSource {
 
     private var fusedLocationClient: FusedLocationProviderClient =
@@ -44,8 +43,8 @@ class LocationDataSourceImpl @Inject constructor(
             Priority.PRIORITY_HIGH_ACCURACY,
             UPDATE_INTERVAL
         ).setMinUpdateDistanceMeters(MIN_DISTANCE_METERS)
-        .setWaitForAccurateLocation(true)
-        .build()
+            .setWaitForAccurateLocation(true)
+            .build()
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
@@ -56,7 +55,7 @@ class LocationDataSourceImpl @Inject constructor(
                             longitude = location.longitude
                         )
                         lastLocation = location
-                        trySend(locationPoint)
+                        trySend(locationPoint).isSuccess
                     }
                 }
             }
@@ -64,7 +63,7 @@ class LocationDataSourceImpl @Inject constructor(
 
         fusedLocationClient.requestLocationUpdates(
             locationRequest,
-            locationCallback!!,
+            locationCallback ?: return@callbackFlow,
             Looper.getMainLooper()
         )
 
