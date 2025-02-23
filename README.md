@@ -2,10 +2,10 @@
 
 ## Demo Video
 
-https://user-images.githubusercontent.com/muratcay/marti_test_case/assets/marti_project.webm
+https://user-images.githubusercontent.com/muratcay/marti_test_case/assets/video_martı.mp4
 
 <video width="100%" controls>
-  <source src="assets/marti_project.webm" type="video/webm">
+  <source src="assets/video_martı.mp4" type="video/mp4">
 </video>
 
 ## Project Overview
