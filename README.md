@@ -1,11 +1,11 @@
 # Martı Test Case Project
 
 ## APK Download
-[Download APK File](https://github.com/MuratCay/marti_test_case/blob/development/assets/app-debug.apk)
+[Download APK File](https://drive.google.com/file/d/1vCTnlkAYFR7YPd2EGvG2NfFpq7EwpYZw/view?usp=sharing)
 
 ## Demo Video
 
-[Demo Video](https://github.com/MuratCay/marti_test_case/blob/development/assets/martı.video.mp4)
+[Demo Video](https://drive.google.com/file/d/1Z1uTjHO4xACPfNJEsNcyZNi6OCZLWfbu/view?usp=sharing)
 
 ## Project Overview
 This Android application is developed as a test case project for Martı. The app demonstrates modern Android development practices and follows clean architecture principles.
