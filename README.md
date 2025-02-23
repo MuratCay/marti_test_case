@@ -4,6 +4,8 @@
 
 https://github.com/MuratCay/marti_test_case/blob/development/assets/video_martı.mp4
 
+[Video İzle](https://github.com/MuratCay/marti_test_case/blob/development/assets/video_martı.mp4)
+
 ## Project Overview
 This Android application is developed as a test case project for Martı. The app demonstrates modern Android development practices and follows clean architecture principles.
 
